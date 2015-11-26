@@ -78,7 +78,8 @@ BasicGame.Game.prototype = {
         this.load.image('logo', 'asset/phaser.png');
         this.load.image('sky', 'asset/sky.png');
         this.load.image('ground', 'asset/platform.png');
-        this.load.image('star', 'asset/star.png');
+        this.load.image('heart', 'asset/heart.png');
+        this.load.image('cactus', 'asset/cactus.png');
         this.load.spritesheet('player', 'asset/dude.png', 32, 48);
     },
 
@@ -89,7 +90,7 @@ BasicGame.Game.prototype = {
 
 
         this.add.sprite(0, 0, 'sky'); 		//  Le background
-        //this.add.sprite(this.world.centerX, this.world.centerY, 'star');
+        //this.add.sprite(this.world.centerX, this.world.centerY, 'heart');
 
         //  We're going to be using physics, so enable the Arcade Physics system
 	    this.physics.startSystem(Phaser.Physics.ARCADE);
@@ -133,33 +134,48 @@ BasicGame.Game.prototype = {
 
 
 
-        ////////////////////////////// LES ETOILES : //////////////////////////////
-        stars = this.add.group();
-        stars.enableBody = true;
+        ////////////////////////////// LES COEURS : //////////////////////////////
+        hearts = this.add.group();
+        hearts.enableBody = true;
 
-        //  On creer 12 étoiles :
+        //  On creer 12 coeurs :
         for (var i = 0; i < 12; i++) {
             //  Créer une étoile a l'intérieur du groupe étoile (on ne passe PAS par un sprite):
-            var star = stars.create(i * 70, 0, 'star');
+            var heart = hearts.create(i * 70, 0, 'heart');
 
-            star.body.gravity.y = 40;								//  Leur gravité
-            star.body.bounce.y 	= 0.5 + Math.random() * 0.2;		// leur rebond en valeur aléatoire
-            star.body.rotation 	= 5;								// add
+            heart.body.gravity.y = 40;								//  Leur gravité
+            heart.body.bounce.y 	= 0.5 + Math.random() * 0.2;		// leur rebond en valeur aléatoire
         }
+
+
+        ////////////////////////////// LES CACTUS : //////////////////////////////
+        cactus = this.add.group();
+        cactus.enableBody = true;
+
+        var cactu1 = cactus.create(0, bottom-54, 'cactus');
+        var cactu2 = cactus.create(200, bottom-54, 'cactus');
+        var cactu3 = cactus.create(250, bottom-325, 'cactus');
+        var cactu4 = cactus.create(380, bottom-54, 'cactus');
+
+        var cactu5 = cactus.create(480, bottom-124, 'cactus');
+        var cactu6 = cactus.create(160, bottom-224, 'cactus');
+
+
 
 
         ////////////////////////////// NIVEAU DE VIE : //////////////////////////////
 		lifeText 		= this.add.text(16, 16, 'vie: 20', { fontSize: '32px', fill: '#000' });
-		lifeTextWin 	= this.add.text(350, 16, '', { fontSize: '40px', fill: '#fff' });
+		lifeTextWin 	= this.add.text(this.world.centerX - 80, this.world.centerY, '', { fontSize: '40px', fill: '#fff' });
 
     },
 
 
 
     update: function() {
-        //  permettre au joueur + stars d'entrer en collision avec les obstacle :
+        //  permettre au joueur + hearts + cactus d'entrer en collision avec les obstacle :
 	    this.physics.arcade.collide(player, platforms);
-	    this.physics.arcade.collide(stars, platforms);
+	    this.physics.arcade.collide(hearts, platforms);
+	    this.physics.arcade.collide(cactus, platforms);
 
 
 
@@ -175,10 +191,10 @@ BasicGame.Game.prototype = {
             // player.body.velocity.x += acceleration.y * 40; // comme on est en landscape, c'est y
 
             if ( acceleration.y < -1 ) {
-                player.body.velocity.x = -650;
+                player.body.velocity.x = -350;
                 player.animations.play('left');
             } else if ( acceleration.y > 1 ) {
-                player.body.velocity.x = 650;
+                player.body.velocity.x = 350;
                 player.animations.play('right');
             } else {
                 player.animations.stop();
@@ -197,22 +213,40 @@ BasicGame.Game.prototype = {
 
 
 
-        ////////////////////////////// Supprime les étoiles si player les touche //////////////////////////////
-		function collectStar (player, star) {
-		    star.kill();
+        ////////////////////////////// Si on touche des coeurs //////////////////////////////
+		function touchHeart (player, heart) {
+		    heart.kill();
 
 			// on ajouter de la vie :
 			life += 10;
 		    lifeText.text = 'vie : ' + life;
 
-			// quand on gagne :
-			if ( life >= 120 ) {
-				lifeTextWin.text = 'Gagné !!';
-			}
+
 		}
-		this.physics.arcade.overlap(player, stars, collectStar, null, this);
+		this.physics.arcade.overlap(player, hearts, touchHeart, null, this);
 
 
+        ////////////////////////////// Si on touche des cactus //////////////////////////////
+		function touchCactus (player, cactu) {
+		    cactu.kill();
+
+			// on supprime de la vie :
+			life -= 10;
+		    lifeText.text = 'vie : ' + life;
+
+		}
+		this.physics.arcade.overlap(player, cactus, touchCactus, null, this);
+
+
+        ////////////////////////////// GAGNER / PERDU //////////////////////////////
+        if ( life >= 60 ) { // TODO: il faudrais changer ici et metre si tous les coeurs ont été touché...
+            lifeTextWin.text = 'Gagné !!';
+            player.kill();
+        } else if ( life <= 0 ) {
+            lifeTextWin.text = 'PERDU :(';
+            player.kill();
+            //this.state.start('Play');
+        }
 
     },
 
