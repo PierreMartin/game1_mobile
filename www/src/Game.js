@@ -237,7 +237,7 @@ BasicGame.Game.prototype = {
 
 			// on ajouter de la vie :
 			life += 10;
-		    lifeText.text = 'vie : ' + life;
+		    lifeText.text = 'life : ' + life;
 		}
 		this.physics.arcade.overlap(player, hearts, touchHeart, null, this);
 
@@ -248,7 +248,7 @@ BasicGame.Game.prototype = {
 
 			// on supprime de la vie :
 			life -= 10;
-		    lifeText.text = 'vie : ' + life;
+		    lifeText.text = 'life : ' + life;
 
 		}
 		this.physics.arcade.overlap(player, cactus, touchCactus, null, this);
@@ -256,22 +256,17 @@ BasicGame.Game.prototype = {
 
         ////////////////////////////// GAGNER / PERDU //////////////////////////////
         if ( life >= 60 ) { // TODO: il faudrais changer ici et metre si tous les coeurs ont été touché...
-            lifeTextWin.text = 'Gagné !!';
+            lifeTextWin.text = 'You win !!';
             player.kill();
         } else if ( life <= 0 || player.body.y > 305 ) {
-            lifeTextWin.text = 'PERDU !';
+            lifeTextWin.text = 'You loose !';
             player.kill();
-            lifeText.text = 'vie : 0';
-            //restart();
+            lifeText.text = 'life : 0';
         }
+
+
     },
 
-   //  restart: function() {
-   //     // These are just examples of what you might do
-   //     player.resetPosition(); // Reset the players position
-   //     score = 0;   // Reset the score to zero
-   //     addMoreEnemies();  // Add more enemies to your game
-   // },
 
     gameResized: function (width, height) {
 
