@@ -17,7 +17,6 @@ var life = 20;
 var lifeText;
 var lifeTextWin;
 
-
 // set Game function prototype
 BasicGame.Game.prototype = {
 
@@ -76,8 +75,11 @@ BasicGame.Game.prototype = {
 
     preload: function () {
         this.load.image('logo', 'asset/phaser.png');
+
         this.load.image('sky', 'asset/sky.png');
-        this.load.image('ground', 'asset/platform.png');
+        this.load.image('platform', 'asset/platform.png');
+        this.load.image('cloud', 'asset/clouds.png');
+
         this.load.image('heart', 'asset/heart.png');
         this.load.image('cactus', 'asset/cactus.png');
         this.load.spritesheet('player', 'asset/dude.png', 32, 48);
@@ -86,10 +88,12 @@ BasicGame.Game.prototype = {
 
 
     create: function () {
-        var bottom = this.world.height; // on positionne les objets par rapport au bas du device (sinon on aura des problemes)
+        var bottom  = this.world.height;  // on positionne les objets par rapport au bas du device
+        var left    = this.world.width;   // on positionne les objets par rapport a la gauche du device
 
 
-        this.add.sprite(0, 0, 'sky'); 		//  Le background
+        //this.add.sprite(0, 0, 'sky'); 		//  Le background
+        this.game.stage.backgroundColor = '#3baff0';
         //this.add.sprite(this.world.centerX, this.world.centerY, 'heart');
 
         //  We're going to be using physics, so enable the Arcade Physics system
@@ -100,19 +104,25 @@ BasicGame.Game.prototype = {
 	    platforms.enableBody = true;
 
         // LE SOL :
-	    var ground = platforms.create(0, bottom - 32, 'ground');
-	    ground.scale.setTo(2, 1);
-	    ground.body.immovable = true; // obstacle
+	    var ground1 = platforms.create(-200, bottom - 32, 'platform');
+	    ground1.body.immovable = true; // obstacle
 
-	    //  LES REBORDS (ledge) :
-	    var ledge1 = platforms.create(400, bottom - 100, 'ground');
-	    ledge1.body.immovable = true; // obstacle
+	    var ground2 = platforms.create(260, bottom - 32, 'platform');
+	    ground2.body.immovable = true; // obstacle
 
-	    var ledge2 = platforms.create(-150, bottom - 200, 'ground');
-	    ledge2.body.immovable = true; // obstacle
+	    var ground3 = platforms.create(660, bottom - 32, 'platform');
+	    ground3.body.immovable = true; // obstacle
+        //ground1.scale.setTo(2, 1);
 
-	    var ledge3 = platforms.create(150, bottom - 300, 'ground');
-	    ledge3.body.immovable = true; // obstacle
+	    //  LES NUAGES :
+	    var cloud1 = platforms.create(360, bottom - 100, 'cloud');
+	    cloud1.body.immovable = true; // obstacle
+
+	    var cloud2 = platforms.create(-150, bottom - 160, 'cloud');
+	    cloud2.body.immovable = true; // obstacle
+
+	    var cloud3 = platforms.create(150, bottom - 250, 'cloud');
+	    cloud3.body.immovable = true; // obstacle
 
 
 
@@ -143,8 +153,8 @@ BasicGame.Game.prototype = {
             //  Créer une étoile a l'intérieur du groupe étoile (on ne passe PAS par un sprite):
             var heart = hearts.create(i * 70, 0, 'heart');
 
-            heart.body.gravity.y = 40;								//  Leur gravité
-            heart.body.bounce.y 	= 0.5 + Math.random() * 0.2;		// leur rebond en valeur aléatoire
+            heart.body.gravity.y = 40;								  //  Leur gravité
+            heart.body.bounce.y  = 0.5 + Math.random() * 0.2;		  // leur rebond en valeur aléatoire
         }
 
 
@@ -153,25 +163,33 @@ BasicGame.Game.prototype = {
         cactus.enableBody = true;
 
         var cactu1 = cactus.create(0, bottom-54, 'cactus');
-        var cactu2 = cactus.create(200, bottom-54, 'cactus');
-        var cactu3 = cactus.create(250, bottom-325, 'cactus');
+
+        var cactu2 = cactus.create(170, bottom-54, 'cactus');
+        var cactu3 = cactus.create(250, bottom-275, 'cactus');
         var cactu4 = cactus.create(380, bottom-54, 'cactus');
 
         var cactu5 = cactus.create(480, bottom-124, 'cactus');
-        var cactu6 = cactus.create(160, bottom-224, 'cactus');
+        var cactu6 = cactus.create(110, bottom-188, 'cactus');
 
+        cactu1.body.gravity.y = 40;
+        cactu2.body.gravity.y = 40;
+        cactu3.body.gravity.y = 40;
+        cactu4.body.gravity.y = 40;
+        cactu5.body.gravity.y = 40;
+        cactu6.body.gravity.y = 40;
 
 
 
         ////////////////////////////// NIVEAU DE VIE : //////////////////////////////
-		lifeText 		= this.add.text(16, 16, 'vie: 20', { fontSize: '32px', fill: '#000' });
+		lifeText 		= this.add.text(16, 16, '', { fontSize: '32px', fill: '#000' });
+        lifeText.text   = 'Vie : ' + life;
 		lifeTextWin 	= this.add.text(this.world.centerX - 80, this.world.centerY, '', { fontSize: '40px', fill: '#fff' });
-
     },
 
 
 
     update: function() {
+
         //  permettre au joueur + hearts + cactus d'entrer en collision avec les obstacle :
 	    this.physics.arcade.collide(player, platforms);
 	    this.physics.arcade.collide(hearts, platforms);
@@ -207,7 +225,7 @@ BasicGame.Game.prototype = {
         $('body').bind('touchstart', function(e) {
             e.preventDefault();
             if ( player.body.touching.down ) {
-    			player.body.velocity.y = -300;
+    			player.body.velocity.y = -260;
     		}
         });
 
@@ -220,8 +238,6 @@ BasicGame.Game.prototype = {
 			// on ajouter de la vie :
 			life += 10;
 		    lifeText.text = 'vie : ' + life;
-
-
 		}
 		this.physics.arcade.overlap(player, hearts, touchHeart, null, this);
 
@@ -242,15 +258,20 @@ BasicGame.Game.prototype = {
         if ( life >= 60 ) { // TODO: il faudrais changer ici et metre si tous les coeurs ont été touché...
             lifeTextWin.text = 'Gagné !!';
             player.kill();
-        } else if ( life <= 0 ) {
-            lifeTextWin.text = 'PERDU :(';
+        } else if ( life <= 0 || player.body.y > 305 ) {
+            lifeTextWin.text = 'PERDU !';
             player.kill();
-            //this.state.start('Play');
+            lifeText.text = 'vie : 0';
+            //restart();
         }
-
     },
 
-
+   //  restart: function() {
+   //     // These are just examples of what you might do
+   //     player.resetPosition(); // Reset the players position
+   //     score = 0;   // Reset the score to zero
+   //     addMoreEnemies();  // Add more enemies to your game
+   // },
 
     gameResized: function (width, height) {
 
